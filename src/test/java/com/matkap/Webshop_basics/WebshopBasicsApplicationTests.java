@@ -9,5 +9,5 @@ class WebshopBasicsApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
+

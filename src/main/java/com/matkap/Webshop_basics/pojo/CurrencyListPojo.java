@@ -11,6 +11,11 @@ public class CurrencyListPojo {
     private String srednji_tecaj;
     private String prodajni_tecaj;
 
+    public CurrencyListPojo() {
+    }
+    public CurrencyListPojo(String srednji_tecaj) {
+        this.srednji_tecaj = srednji_tecaj;
+    }
 
     public String getBroj_tecajnice() {
         return broj_tecajnice;

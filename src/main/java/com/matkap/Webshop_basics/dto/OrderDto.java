@@ -1,6 +1,8 @@
 package com.matkap.Webshop_basics.dto;
 
 import com.matkap.Webshop_basics.entity.Customer;
+import com.matkap.Webshop_basics.entity.Order;
+import com.matkap.Webshop_basics.entity.Product;
 import com.matkap.Webshop_basics.entity.StatusEnum;
 
 import java.math.BigDecimal;
@@ -14,6 +16,20 @@ public class OrderDto {
     private BigDecimal totalPriceUsd;
 
 
+    public OrderDto() {
+    }
+
+    public OrderDto(Order order) {
+        this.id = order.getId();
+        this.customer = order.getCustomer();
+        this.statusEnum = order.getStatusEnum();
+        this.totalPriceEur = order.getTotalPriceEur();
+        this.totalPriceUsd = order.getTotalPriceUsd();
+    }
+
+    public static OrderDto from(Order order) {
+        return new OrderDto(order);
+    }
 
     public Long getId() {
         return id;

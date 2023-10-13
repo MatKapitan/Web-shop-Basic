@@ -17,7 +17,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.dao.EmptyResultDataAccessException;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -67,8 +66,15 @@ public class OrderItemServiceImplTest {
                 .isThrownBy(() -> this.orderItemService.createOrderItem(quantity,1L, 0L))
                 .withMessage("The Order with id '1' does not exist in our records");
     }
-   // --------------------------------------------
 
+    @Test
+    public void createOrderItem_nullOrder_shouldThrowException(){
+        QuantityRequest quantity = new QuantityRequest(1);
+
+        assertThatExceptionOfType(OrderNotFoundException.class)
+                .isThrownBy(() -> this.orderItemService.createOrderItem(quantity,null, 0L))
+                .withMessage("The Order with id 'null' does not exist in our records");
+    }
     @Test
     public void createOrderItem_orderItemAlreadySubmitted_shouldThrowException(){
         QuantityRequest quantity = new QuantityRequest(1);
@@ -80,7 +86,6 @@ public class OrderItemServiceImplTest {
                 .isThrownBy(() -> this.orderItemService.createOrderItem(quantity,1L, 0L))
                 .withMessage("The Order with id '"+ 1 + "' has already been finalised");
     }
-///-----------------------------
     @Test
     public void createOrderItem_nonExistentOrAvailableProduct_shouldThrowException(){
         QuantityRequest quantity = new QuantityRequest(1);
@@ -98,28 +103,21 @@ public class OrderItemServiceImplTest {
         Order order = new Order(new Customer(), StatusEnum.DRAFT);
         Product product = new Product("Apple", BigDecimal.valueOf(1.23), "Red apple", true);
 
-
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(productRepository.findByIdAndIsAvailable(0L, true)).thenReturn(Optional.of(product));
         when(orderItemRepository.existsByProduct_IdAndOrder_Id(0L, 1L)).thenReturn(true);
 
         assertThatExceptionOfType(ProductAlreadyAddedException.class)
-                .isThrownBy(() -> this.orderItemService.createOrderItem(quantity,1L, 0L))
+                .isThrownBy(() -> this.orderItemService.createOrderItem( quantity,1L, 0L))
                 .withMessage("Can't add same product twice");
     }
 
     @Test
-    public void deleteCustomer_elementsExist_shouldDeleteEntity() {
+    public void deleteCustomer_elementsExist_shouldDeleteCustomer() {
         doNothing().when(orderItemRepository).deleteById(anyLong());
 
         orderItemService.deleteOrderItem(anyLong());
         verify(orderItemRepository, times(1)).deleteById(anyLong());
         verifyNoMoreInteractions(orderItemRepository);
     }
-
-    @Test
-    public void updateOrderItem(){
-    }
-
-
 }

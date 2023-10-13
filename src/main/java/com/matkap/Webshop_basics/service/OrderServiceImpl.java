@@ -1,5 +1,6 @@
 package com.matkap.Webshop_basics.service;
 
+import com.matkap.Webshop_basics.component.ExchangeRateComponent;
 import com.matkap.Webshop_basics.dto.OrderDto;
 import com.matkap.Webshop_basics.entity.Customer;
 import com.matkap.Webshop_basics.entity.Order;
@@ -8,15 +9,12 @@ import com.matkap.Webshop_basics.exception.ActiveOrderExistException;
 import com.matkap.Webshop_basics.exception.FinalPriceIsNullException;
 import com.matkap.Webshop_basics.exception.notFound.CustomerNotFoundException;
 import com.matkap.Webshop_basics.exception.notFound.OrderNotFoundException;
-import com.matkap.Webshop_basics.pojo.CurrencyListPojo;
 import com.matkap.Webshop_basics.repository.CustomerRepository;
 import com.matkap.Webshop_basics.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -25,12 +23,15 @@ import java.util.Objects;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    public static final String HNB_EUR_TO_USD_EXCHANGE_RATE_URL = "https://api.hnb.hr/tecajn-eur/v3?valuta=USD";
+    private static final String HNB_EUR_TO_USD_EXCHANGE_RATE_URL = "https://api.hnb.hr/tecajn-eur/v3?valuta=USD";
     @Autowired
     OrderRepository orderRepository;
 
     @Autowired
     CustomerRepository customerRepository;
+
+    @Autowired
+    ExchangeRateComponent exchangeRateComponent;
 
 
     @Override
@@ -41,18 +42,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<Order> getAllOrders(Pageable page) {
-        return orderRepository.findAll(page);
+    public Page<OrderDto> getAllOrders(Pageable page) {
+        Page<Order> orders = orderRepository.findAll(page);
+        return orders.map(OrderDto::from);
     }
 
     @Override
-    public void createOrder(Long customer_id) {
+    public Long createOrder(Long customer_id) {
         Customer customer = customerRepository.findById(customer_id).orElseThrow(()-> new CustomerNotFoundException(customer_id));
         if(orderRepository.existsByCustomer_IdAndStatusEnum(customer_id, StatusEnum.DRAFT)) throw new ActiveOrderExistException();
         Order order = new Order();
         order.setStatusEnum(StatusEnum.DRAFT);
         order.setCustomer(customer);
-        orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        return savedOrder.getId();
     }
 
     @Override
@@ -65,7 +68,7 @@ public class OrderServiceImpl implements OrderService {
         Objects.requireNonNull(id, "id must not be null");
         Order order = orderRepository.findById(id).orElseThrow(() -> new OrderNotFoundException(id));
         Double finalPriceEur = orderRepository.getFinalPrice(id).orElseThrow(FinalPriceIsNullException::new);
-        BigDecimal eurToUsdExchange = getCurrencyListMiddleFloat();
+        BigDecimal eurToUsdExchange = exchangeRateComponent.getMiddleExchangeRate(HNB_EUR_TO_USD_EXCHANGE_RATE_URL);
         order.setTotalPriceEur(BigDecimal.valueOf(finalPriceEur));
         order.setTotalPriceUsd((order.getTotalPriceEur().multiply(eurToUsdExchange)).setScale(2, RoundingMode.HALF_UP));
         order.setStatusEnum(StatusEnum.SUBMITTED);
@@ -73,19 +76,6 @@ public class OrderServiceImpl implements OrderService {
         return orderToDto(order);
 
     }
-
-
-    private BigDecimal getCurrencyListMiddleFloat(){
-        RestTemplate restTemplate = new RestTemplate();
-        ResponseEntity<CurrencyListPojo[]> response = restTemplate.getForEntity(HNB_EUR_TO_USD_EXCHANGE_RATE_URL, CurrencyListPojo[].class);
-        CurrencyListPojo[] currencyList = response.getBody();
-        CurrencyListPojo currencyListPojo = Objects.requireNonNull(currencyList)[0];
-
-        String x = currencyListPojo.getSrednji_tecaj().replace(',','.');
-        return new BigDecimal(x);
-    }
-
-
 
     //        RestTemplate restTemplate = new RestTemplate();
 //        ResponseEntity<CurrencyListPojo[]> response = restTemplate.getForEntity("https://api.hnb.hr/tecajn-eur/v3?valuta=USD", CurrencyListPojo[].class);

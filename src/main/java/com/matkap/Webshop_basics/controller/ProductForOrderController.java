@@ -25,10 +25,11 @@ public class ProductForOrderController {
     OrderItemService orderItemService;
 
 
-//    @GetMapping("/{product_id}")
-//    public ResponseEntity<ProductDto> getOrderItemById(@PathVariable Long id){
-//        return new ResponseEntity<>(orderItemService.getOrderItemById(id), HttpStatus.OK);
-//    }
+    @GetMapping("/{product_id}")
+    public ResponseEntity<ProductDto> getOrderItemById(@PathVariable("order_id") Long id,
+                                                       @PathVariable("product_id") Long productId){
+        return new ResponseEntity<>(orderItemService.getOrderItemById(id, productId), HttpStatus.OK);
+    }
 
     @GetMapping
     public ResponseEntity<Page<ProductDto>> getAllOrderItem(@PathVariable(name = "order_id") Long id,

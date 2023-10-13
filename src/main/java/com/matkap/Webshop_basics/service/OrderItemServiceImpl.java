@@ -1,15 +1,15 @@
 package com.matkap.Webshop_basics.service;
 
-import com.matkap.Webshop_basics.dto.OrderDto;
+import com.matkap.Webshop_basics.dto.ProductDto;
 import com.matkap.Webshop_basics.dto.QuantityRequest;
 import com.matkap.Webshop_basics.entity.Order;
 import com.matkap.Webshop_basics.entity.OrderItem;
 import com.matkap.Webshop_basics.entity.Product;
 import com.matkap.Webshop_basics.entity.StatusEnum;
 import com.matkap.Webshop_basics.exception.OrderFinalisedException;
+import com.matkap.Webshop_basics.exception.ProductAlreadyAddedException;
 import com.matkap.Webshop_basics.exception.notFound.OrderItemNotFoundException;
 import com.matkap.Webshop_basics.exception.notFound.OrderNotFoundException;
-import com.matkap.Webshop_basics.exception.ProductAlreadyAddedException;
 import com.matkap.Webshop_basics.exception.notFound.ProductNotFoundException;
 import com.matkap.Webshop_basics.repository.OrderItemRepository;
 import com.matkap.Webshop_basics.repository.OrderRepository;
@@ -29,7 +29,11 @@ public class OrderItemServiceImpl implements OrderItemService{
     @Autowired
     ProductRepository productRepository;
 
-
+    @Override
+    public ProductDto getOrderItemById(Long id, Long productId) {
+        return productRepository.findByIdAndOrderId(id, productId)
+                .map(ProductServiceImpl::productToDto).orElseThrow();
+    }
 
     @Override
     public void createOrderItem(QuantityRequest quantityRequest, Long order_id, Long product_id) {
@@ -63,8 +67,5 @@ public class OrderItemServiceImpl implements OrderItemService{
         OrderItem orderItemToUpdate = orderItemRepository.findByProduct_IdAndOrder_Id(product_id, order_id).orElseThrow(()-> new OrderItemNotFoundException(order_id, product_id));
         orderItemToUpdate.setQuantity(quantityRequest.getQuantity());
         orderItemRepository.save(orderItemToUpdate);
-
-
-
     }
 }

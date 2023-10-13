@@ -1,6 +1,6 @@
 package com.matkap.Webshop_basics.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.matkap.Webshop_basics.entity.Customer;
 import com.matkap.Webshop_basics.entity.Order;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -30,6 +30,18 @@ public class CustomerDto {
         this.first_name = first_name;
         this.last_name = last_name;
         this.email = email;
+    }
+
+    public CustomerDto(Customer customer) {
+        this.id = customer.getId();
+        this.first_name = customer.getFirst_name();
+        this.last_name = customer.getLast_name();
+        this.email = customer.getEmail();
+        this.order = customer.getOrder();
+    }
+
+    public static CustomerDto from(Customer customer) {
+        return new CustomerDto(customer);
     }
 
     public Long getId() {

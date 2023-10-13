@@ -7,10 +7,11 @@ import org.apache.commons.lang3.RandomStringUtils;
 import java.math.BigDecimal;
 
 @Entity
+@Table(name = "product")
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
     @Column(name = "code")

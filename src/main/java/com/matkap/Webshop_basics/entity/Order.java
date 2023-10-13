@@ -2,10 +2,8 @@ package com.matkap.Webshop_basics.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Null;
 
 import java.math.BigDecimal;
-import java.security.AllPermission;
 import java.util.List;
 
 @Entity
@@ -13,7 +11,7 @@ import java.util.List;
 public class Order {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 

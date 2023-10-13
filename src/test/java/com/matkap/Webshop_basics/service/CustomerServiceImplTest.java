@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
     //getAllCustomers - normal
     //updateCustomer - exception
     //deleteCustomer - normal
-    // TODO createCustomer, updateCustomer - normal
+
 
     @Mock
     private CustomerRepository customerRepository;
@@ -39,13 +39,13 @@ import static org.mockito.Mockito.*;
 
     @Test
     public void getAllOCustomers_elementsExist_shouldReturnAllCustomer() {
-        PageImpl<Customer> page = new PageImpl(List.of(
+        PageImpl page = new PageImpl(List.of(
                 new Customer("Matija", "Kapitan", "matija.kapitan1@gmail.com"),
                 new Customer("Petar", "Bla", "1dvsdv@EAfw.com")
         ));
         when(customerRepository.findAll(PageRequest.of(1 , 10))).thenReturn(page);
 
-        Page<Customer> result = customerService.getAllOCustomers(PageRequest.of(1,10));
+        Page<CustomerDto> result = customerService.getAllOCustomers(PageRequest.of(1,10));
 
         assertEquals(2, result.getSize());
         assertEquals(2, result.getContent().size());
@@ -115,6 +115,7 @@ import static org.mockito.Mockito.*;
         verify(customerRepository, times(1)).deleteById(anyLong());
         verifyNoMoreInteractions(customerRepository);
     }
+
 
 
 

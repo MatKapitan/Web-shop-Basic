@@ -6,12 +6,8 @@ import com.matkap.Webshop_basics.exception.notFound.CustomerNotFoundException;
 import com.matkap.Webshop_basics.repository.CustomerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-
-import java.util.List;
 
 @Service
 public class CustomerServiceImpl implements CustomerService{
@@ -26,17 +22,20 @@ public class CustomerServiceImpl implements CustomerService{
     }
 
     @Override
-    public Page<Customer> getAllOCustomers(Pageable page) {
-        return customerRepository.findAll(page);
+    public Page<CustomerDto> getAllOCustomers(Pageable page) {
+        Page<Customer> customers = customerRepository.findAll(page);
+        return customers.map(CustomerDto::from);
+
 
         //return customerRepository.findAll(PageRequest.of(page.getPageNumber(),page.getPageSize()));
 
     }
 
     @Override
-    public void createCustomer(CustomerDto customerDto) {
+    public Long createCustomer(CustomerDto customerDto) {
         Customer customer = customerDtoToEntity(customerDto);
-        customerRepository.save(customer);
+        Customer savedCustomer = customerRepository.save(customer);
+        return savedCustomer.getId();
     }
 
     @Override

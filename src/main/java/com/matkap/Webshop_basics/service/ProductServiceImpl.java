@@ -30,14 +30,14 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Page<ProductDto> getProducts(Pageable page) {
         Page<Product> products = productRepository.findAll(page);
-        Page<ProductDto> productsDto = products.map(ProductDto::from);
-        return productsDto;
+        return products.map(ProductDto::from);
     }
 
     @Override
-    public void createProduct(ProductDto productDto) {
+    public Long createProduct(ProductDto productDto) {
         Product product = productDtoToEntity(productDto);
-        productRepository.save(product);
+        Product savedProduct = productRepository.save(product);
+        return savedProduct.getId();
     }
 
     @Override
@@ -71,7 +71,13 @@ public class ProductServiceImpl implements ProductService {
         productRepository.save(productToUpdate);
     }
 
-    public ProductDto productToDto(Product product, Integer quantity){
+    public static ProductDto productToDto(Product product, Integer quantity){
+        ProductDto productDto = productToDto(product);
+        productDto.setQuantity(quantity);
+        return productDto;
+    }
+
+    public static ProductDto productToDto(Product product){
         ProductDto productDto = new ProductDto();
         productDto.setCode(product.getCode());
         productDto.setId(product.getId());
@@ -79,10 +85,9 @@ public class ProductServiceImpl implements ProductService {
         productDto.setName(product.getName());
         productDto.setAvailable(product.is_available());
         productDto.setPriceEur(product.getPriceEur());
-        productDto.setQuantity(quantity);
         return  productDto;
     }
-    public Product productDtoToEntity(ProductDto productDto) {
+    public static Product productDtoToEntity(ProductDto productDto) {
         Product product = new Product();
         product.setCode(productDto.getCode());
         product.setId(productDto.getId());
